@@ -946,10 +946,11 @@ public:
                 auto paramValue = static_cast<Vst::ParamValue> (pluginInstance->getCurrentProgram())
                                   / static_cast<Vst::ParamValue> (numPrograms - 1);
 
-                if (paramValue != EditController::getParamNormalized (JuceAudioProcessor::paramPreset))
+                if (paramValue != lastProgramLoadedNormalized)
                 {
                     beginEdit (JuceAudioProcessor::paramPreset);
                     paramChanged (JuceAudioProcessor::paramPreset, (float) paramValue);
+                    lastProgramLoadedNormalized = paramValue;
                     endEdit (JuceAudioProcessor::paramPreset);
 
                     flags |= Vst::kParamValuesChanged;
@@ -1013,6 +1014,7 @@ private:
                       inSetupProcessing { false };
 
     int lastLatencySamples = 0;
+    float lastProgramLoadedNormalized = 0.0f;
 
    #if ! JUCE_MAC
     float lastScaleFactorReceived = 1.0f;
@@ -2584,6 +2586,7 @@ public:
                     {
                         auto numPrograms  = pluginInstance->getNumPrograms();
                         auto programValue = roundToInt (value * (jmax (0, numPrograms - 1)));
+                        juceVST3EditController->lastProgramLoadedNormalized = value;
 
                         if (numPrograms > 1 && isPositiveAndBelow (programValue, numPrograms)
                              && programValue != pluginInstance->getCurrentProgram())
